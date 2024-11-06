@@ -6,6 +6,8 @@ from argparse import ArgumentParser
 from pathlib import Path
 from warnings import filterwarnings
 
+import numpy as np
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
@@ -14,13 +16,16 @@ from librosa.util import find_files
 from sklearn.manifold import TSNE
 from tqdm import tqdm
 
+from data.wav2mel import Wav2Mel
+
 
 def visualize(data_dirs, wav2mel_path, checkpoint_path, output_path):
     """Visualize high-dimensional embeddings using t-SNE."""
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    wav2mel = torch.jit.load(wav2mel_path)
+    # wav2mel = torch.jit.load(wav2mel_path)
+    wav2mel = Wav2Mel()
     dvector = torch.jit.load(checkpoint_path).eval().to(device)
 
     print("[INFO] model loaded.")
@@ -52,7 +57,7 @@ def visualize(data_dirs, wav2mel_path, checkpoint_path, output_path):
             emb = emb.detach().cpu().numpy()
         embs.append(emb)
         
-    embs = np.array(emb)
+    embs = np.array(embs)
     tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=300)
     transformed = tsne.fit_transform(embs)
 
